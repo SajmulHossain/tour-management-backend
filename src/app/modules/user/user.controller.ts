@@ -10,7 +10,7 @@ const createUser = async (req: Request, res: Response) => {
       email,
     });
 
-    res.status(httpStatus.ACCEPTED).json({
+    res.status(httpStatus.CREATED).json({
       message: "User created Successfully",
       user,
     });
