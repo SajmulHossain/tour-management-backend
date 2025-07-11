@@ -1,7 +1,7 @@
-import httpStatus from 'http-status-codes';
 import cors from "cors";
-import express, { Request, Response } from "express";
+import express from "express";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
+import { notFound } from './app/middlewares/notFound';
 import { router } from "./app/routes";
 
 const app = express();
@@ -19,12 +19,6 @@ app.get("/", (req, res) => {
 
 
 app.use(globalErrorHandler)
-app.use((req: Request, res: Response) => {
-  res.status(httpStatus.NOT_FOUND).
-  json({
-    success: false,
-    message: "Route not found"
-  })
-})
+app.use(notFound)
 
 export default app;
