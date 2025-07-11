@@ -28,16 +28,17 @@ const createUser = catchAsync(async(req: Request, res: Response, next: NextFunct
 })
 
 
-const getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
-  try {
+const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const users = await UserServices.getAllUser();
 
-    return users;
-  } catch (error) {
-    console.log(error);
-    next(error);
+    res.status(httpStatus.OK)
+    .json({
+      success: true,
+      message: 'All users retrived successfully',
+      data: users
+    })
   }
-};
+);
 
 export const UserControllers = {
   createUser,
