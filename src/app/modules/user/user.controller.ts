@@ -1,27 +1,77 @@
-import { Request, Response } from "express";
-import { User } from "./user.model";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes";
+import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
+import { UserServices } from "./user.service";
+import { verifyToken } from "../../utils/jwt";
+import { envVars } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 
-const createUser = async (req: Request, res: Response) => {
-  try {
-    const { name, email } = req.body;
-    const user = await User.create({
-      name,
-      email,
-    });
+// const createUser = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const user = await UserServices.createUser(req.body);
 
-    res.status(httpStatus.CREATED).json({
-      message: "User created Successfully",
-      user,
-    });
-  } catch (error) {
-    res.status(httpStatus.BAD_REQUEST).json({
-      message: "Something Went Wrong",
-      error,
+//     res.status(httpStatus.CREATED).json({
+//       message: "User created Successfully",
+//       user,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+const createUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = await UserServices.createUser(req.body);
+
+    // res.status(httpStatus.CREATED).json({
+    //   message: "User created Successfully",
+    //   user,
+    // });
+
+    sendResponse(res, {
+      statusCode: httpStatus.CREATED,
+      message: "User Created Successfully",
+      data: user,
+      success: true,
     });
   }
-};
+);
+
+const updateUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.id;
+    const token = req.headers.authorization;
+    const verifiedToken = verifyToken(token as string, envVars.JWT_ACCESS_SECRET) as JwtPayload;
+    const user = await UserServices.updateUser(userId,req.body,verifiedToken);
+
+    sendResponse(res, {
+      statusCode: httpStatus.CREATED,
+      message: "User Updated Successfully",
+      data: user,
+      success: true,
+    });
+  }
+);
+
+const getAllUsers = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { data, meta } = await UserServices.getAllUser();
+
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: "All users retrived successfully",
+      data,
+      meta,
+    });
+  }
+);
 
 export const UserControllers = {
   createUser,
+  getAllUsers,
+  updateUser
 };
+
+// * routing matching -> controllers -> service -> model -> DB
