@@ -13,5 +13,6 @@ router.post(
   UserControllers.createUser
 );
 router.get("", checkAuth(Role.ADMIN, Role.SUPER_ADMIN), UserControllers.getAllUsers);
+router.patch("/:id", checkAuth(...Object.values(Role)), UserControllers.updateUser)
 
 export const UserRoutes = router;
