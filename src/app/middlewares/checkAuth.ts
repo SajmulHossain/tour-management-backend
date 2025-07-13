@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { envVars } from "../config/env";
-import { JwtPayload } from "jsonwebtoken";
 import AppError from "../errorHelpers/AppError";
-import jwt from 'jsonwebtoken';
+import { verifyToken } from "../utils/jwt";
+import { JwtPayload } from "jsonwebtoken";
 
 export const checkAuth =
   (...authRoles: string[]) =>
@@ -11,7 +11,7 @@ export const checkAuth =
     if (!accessToken) {
       throw new AppError(403, "No token recieved");
     }
-    const verifiedToken = jwt.verify(
+    const verifiedToken = verifyToken(
       accessToken,
       envVars.JWT_ACCESS_SECRET
     ) as JwtPayload;
@@ -20,5 +20,6 @@ export const checkAuth =
       throw new AppError(403, "You are not permitted to access this route");
     }
 
+    req.user = verifiedToken;
     next();
   };
