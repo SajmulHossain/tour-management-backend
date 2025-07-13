@@ -1,28 +1,43 @@
-import { IUser } from "./user.interface";
+import httpStatus from "http-status-codes";
+import AppError from "../../errorHelpers/AppError";
+import { IAuthProvider, IUser } from "./user.interface";
 import { User } from "./user.model";
 
 const createUser = async (payload: Partial<IUser>) => {
-    const { name, email } = payload;
-        const user = await User.create({
-          name,
-          email,
-        });
+  const { email, ...rest } = payload;
+  const isUserExist = await User.findOne({ email });
 
-    return user;
-}
+  if (isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User Already Exists");
+  }
 
-const getAllUser = async() => {
-    const users = await User.find({});
-    const totalUser = await User.countDocuments();
+  const authProvider: IAuthProvider = {
+    provider: "credintials",
+    providerId: email as string,
+  };
 
-    return {
-        data:users,
-        meta: {
-            total: totalUser
-        }
-    };
-}
+  const user = await User.create({
+    email,
+    auths: [authProvider],
+    ...rest,
+  });
+
+  return user;
+};
+
+const getAllUser = async () => {
+  const users = await User.find({});
+  const totalUser = await User.countDocuments();
+
+  return {
+    data: users,
+    meta: {
+      total: totalUser,
+    },
+  };
+};
 
 export const UserServices = {
-    createUser, getAllUser
-}
+  createUser,
+  getAllUser,
+};
