@@ -1,5 +1,6 @@
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import httpStatus from "http-status-codes";
+import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import {
   createNewAccessTokenWithRefreshToken,
@@ -39,12 +40,34 @@ const credentialLogin = async (payload: Partial<IUser>) => {
 };
 
 const getNewAccessToken = async (refreshToken: string) => {
-  const newAccessToken = await createNewAccessTokenWithRefreshToken(refreshToken);
+  const newAccessToken = await createNewAccessTokenWithRefreshToken(
+    refreshToken
+  );
 
   return { accessToken: newAccessToken };
 };
 
+const changePassword = async (
+  oldPassword: string,
+  newPassword: string,
+  id: string
+) => {
+  const user = await User.findById(id);
+  const isOldPasswordMatch = await compare(
+    oldPassword,
+    user?.password as string
+  );
+
+  if (!isOldPasswordMatch) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Old Password didn't matched");
+  }
+
+  await User.findByIdAndUpdate(id, {
+    password: await hash(newPassword, Number(envVars.BCRYPT_SALT_ROUND)),
+  });
+};
 export const AuthServices = {
   credentialLogin,
   getNewAccessToken,
+  changePassword,
 };
