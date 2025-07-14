@@ -1,8 +1,11 @@
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import httpStatus from "http-status-codes";
 import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
-import { generateToken } from "../../utils/jwt";
+import {
+  createNewAccessTokenWithRefreshToken,
+  createUserToken,
+} from "../../utils/userToken";
 import { IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 
@@ -24,19 +27,47 @@ const credentialLogin = async (payload: Partial<IUser>) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Incorrect Password");
   }
 
-  const jwtPayload = {
-    userId: isUserExist._id,
-    email: isUserExist.email,
-    role: isUserExist.role
-  }
+  const { accessToken, refreshToken } = createUserToken(isUserExist);
 
-  const accessToken = generateToken(jwtPayload, envVars.JWT_ACCESS_SECRET, envVars.JWT_ACCESS_EXPIRES)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password: pass, ...rest } = isUserExist.toObject();
 
   return {
-    accessToken
+    accessToken,
+    refreshToken,
+    user: rest,
   };
 };
 
+const getNewAccessToken = async (refreshToken: string) => {
+  const newAccessToken = await createNewAccessTokenWithRefreshToken(
+    refreshToken
+  );
+
+  return { accessToken: newAccessToken };
+};
+
+const changePassword = async (
+  oldPassword: string,
+  newPassword: string,
+  id: string
+) => {
+  const user = await User.findById(id);
+  const isOldPasswordMatch = await compare(
+    oldPassword,
+    user?.password as string
+  );
+
+  if (!isOldPasswordMatch) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Old Password didn't matched");
+  }
+
+  await User.findByIdAndUpdate(id, {
+    password: await hash(newPassword, Number(envVars.BCRYPT_SALT_ROUND)),
+  });
+};
 export const AuthServices = {
   credentialLogin,
+  getNewAccessToken,
+  changePassword,
 };
