@@ -4,7 +4,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import AppError from "../../errorHelpers/AppError";
-import { setAuthCookie } from "../../utils/setCookies";
+import { clearAuthCookies, setAuthCookie } from "../../utils/setCookies";
 
 const credentialLogin = catchAsync(async (req: Request, res: Response) => {
   const loginInfo = await AuthServices.credentialLogin(req.body);
@@ -38,7 +38,18 @@ const getNewAccessToken = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const logout = catchAsync(async (req: Request, res: Response) => {
+  clearAuthCookies(res);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: "Logged Out Successfully",
+    data: null,
+    success: true,
+  });
+});
+
 export const AuthControllers = {
   credentialLogin,
-  getNewAccessToken,
+  getNewAccessToken,logout
 };
