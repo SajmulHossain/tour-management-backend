@@ -4,19 +4,12 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import AppError from "../../errorHelpers/AppError";
+import { setAuthCookie } from "../../utils/setCookies";
 
 const credentialLogin = catchAsync(async (req: Request, res: Response) => {
   const loginInfo = await AuthServices.credentialLogin(req.body);
 
-  res.cookie("accessToken", loginInfo.accessToken, {
-    httpOnly: true,
-    secure: false,
-  })
-
-  res.cookie("refreshToken", loginInfo.refreshToken, {
-    httpOnly: true,
-    secure: false,
-  })
+  setAuthCookie(res, loginInfo);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -29,11 +22,13 @@ const credentialLogin = catchAsync(async (req: Request, res: Response) => {
 const getNewAccessToken = catchAsync(async (req: Request, res: Response) => {
   const { refreshToken } = req.cookies;
 
-  if(!refreshToken) {
+  if (!refreshToken) {
     throw new AppError(httpStatus.BAD_REQUEST, "No refresh token found");
   }
 
   const tokenInfo = await AuthServices.getNewAccessToken(refreshToken);
+
+  setAuthCookie(res, tokenInfo);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
