@@ -22,15 +22,21 @@ passport.use(
         const isUserExist = await User.findOne({ email });
 
         if (!isUserExist) {
-          return done(null, false, { message: "User does not exist" });
+          // return done(null, false, { message: "User does not exist" });
+          return done("User does not exist");
         }
 
         // * checking if the user is google authenticated, because it will skip the password
         const isGoogleAuthenticated = isUserExist.auths.some(auth => auth.provider === "google");
 
-        if(isGoogleAuthenticated) {
-          return done(null, false, {message: "You are google authenticated. Login in with google or set a password"})
+        if(isGoogleAuthenticated && !isUserExist.password) {
+          // return done(null, false, {message: "You are google authenticated. Login in with google or set a password"})
+          return done(
+            "You are google authenticated. Login in with google or set a password"
+          );
         }
+
+
 
         const isPasswordMatched = await compare(
           password as string,
