@@ -13,16 +13,16 @@ import passport from "passport";
 const credentialLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // const loginInfo = await AuthServices.credentialLogin(req.body);
-    passport.authenticate("local", async (err: any, user: any, info: any) => {
+    passport.authenticate("local", async (err: any, user: any) => {
       if (err) {
         // return new AppError(401, err);
         // return next(err);
 
-        return next(new AppError(401, info.message));
+        return next(new AppError(401, err));
       }
 
       if (!user) {
-        return next(new AppError(401, info.message));
+        return next(new AppError(401, err));
       }
 
       const userToken = createUserToken(user);

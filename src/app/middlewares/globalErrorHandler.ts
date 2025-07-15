@@ -13,12 +13,27 @@ export const globalErrorHandler = (
   let statusCode = 500;
   let message = "Something Went Wrong";
 
-  if(error instanceof AppError) {
+  // * duplicate error
+  if (error.code === 11000) {
+    message = error.message.match(/"([^"]*)"/)[1] + " already exist";
+    statusCode = 400;
+  }
+  // * object id error
+  else if (error.name === "CastError") {
+    statusCode = 400;
+    message = "Invalid mongodb object id";
+  }
+  // * validation error
+  else if(error.name === "ValidationError") {
+    statusCode = 400;
+    message = "Validation error occured"
+  }
+   else if (error instanceof AppError) {
     statusCode = error.statusCode;
-    message = error.message
-  } else if(error instanceof Error) {
+    message = error.message;
+  } else if (error instanceof Error) {
     statusCode = 500;
-    message = error.message
+    message = error.message;
   }
 
   res.status(statusCode).json({
