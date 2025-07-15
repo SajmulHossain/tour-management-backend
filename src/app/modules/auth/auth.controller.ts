@@ -1,26 +1,49 @@
-import { Request, Response } from "express";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
+import AppError from "../../errorHelpers/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { AuthServices } from "./auth.service";
-import AppError from "../../errorHelpers/AppError";
 import { clearAuthCookies, setAuthCookie } from "../../utils/setCookies";
-import { JwtPayload } from "jsonwebtoken";
 import { createUserToken } from "../../utils/userToken";
-import { envVars } from "../../config/env";
+import { AuthServices } from "./auth.service";
+import passport from "passport";
 
-const credentialLogin = catchAsync(async (req: Request, res: Response) => {
-  const loginInfo = await AuthServices.credentialLogin(req.body);
+const credentialLogin = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // const loginInfo = await AuthServices.credentialLogin(req.body);
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+      if (err) {
+        // return new AppError(401, err);
+        // return next(err);
 
-  setAuthCookie(res, loginInfo);
+        return next(new AppError(401, info.message));
+      }
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    message: "User Logged In Successfully",
-    data: loginInfo,
-    success: true,
-  });
-});
+      if (!user) {
+        return next(new AppError(401, info.message));
+      }
+
+      const userToken = createUserToken(user);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: pass, ...rest } = user.toObject();
+
+      setAuthCookie(res, userToken);
+
+      sendResponse(res, {
+        statusCode: httpStatus.OK,
+        message: "User Logged In Successfully",
+        data: {
+          accessToken: userToken.accessToken,
+          refreshToken: userToken.refreshToken,
+          user: rest
+        },
+        success: true,
+      });
+    })(req, res, next);
+  }
+);
 
 const getNewAccessToken = catchAsync(async (req: Request, res: Response) => {
   const { refreshToken } = req.cookies;
@@ -66,24 +89,26 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const googleCallBackController = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user;
-  console.log(user);
+const googleCallBackController = catchAsync(
+  async (req: Request, res: Response) => {
+    const user = req.user;
+    console.log(user);
 
-  if(!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+    const tokenInfo = createUserToken(user);
+    setAuthCookie(res, tokenInfo);
+
+    res.redirect("https://sajmul.com");
   }
-  
-  const tokenInfo = createUserToken(user)
-  setAuthCookie(res, tokenInfo);
-
-  res.redirect("https://sajmul.com");
-});
+);
 
 export const AuthControllers = {
   credentialLogin,
   getNewAccessToken,
   logout,
   changePassword,
-  googleCallBackController
+  googleCallBackController,
 };
