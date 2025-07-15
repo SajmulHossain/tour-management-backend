@@ -8,6 +8,46 @@ import {
 import { envVars } from "./env";
 import { User } from "../modules/user/user.model";
 import { Role } from "../modules/user/user.interface";
+import { Strategy as LocalStrategy } from "passport-local";
+import { compare } from "bcryptjs";
+
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async (email: string, password: string, done: any) => {
+      try {
+        const isUserExist = await User.findOne({ email });
+
+        if (!isUserExist) {
+          return done(null, false, { message: "User does not exist" });
+        }
+
+        // * checking if the user is google authenticated, because it will skip the password
+        const isGoogleAuthenticated = isUserExist.auths.some(auth => auth.provider === "google");
+
+        if(isGoogleAuthenticated) {
+          return done(null, false, {message: "You are google authenticated. Login in with google or set a password"})
+        }
+
+        const isPasswordMatched = await compare(
+          password as string,
+          isUserExist.password as string
+        );
+
+        if (!isPasswordMatched) {
+          return done(null, false, { message: "Password does not matched" });
+        }
+
+        return done(null, isUserExist);
+      } catch (error) {
+        done(error);
+      }
+    }
+  )
+);
 
 passport.use(
   new GoogleStrategy(
