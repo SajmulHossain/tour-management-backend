@@ -5,6 +5,9 @@ import { sendResponse } from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import AppError from "../../errorHelpers/AppError";
 import { clearAuthCookies, setAuthCookie } from "../../utils/setCookies";
+import { JwtPayload } from "jsonwebtoken";
+import { createUserToken } from "../../utils/userToken";
+import { envVars } from "../../config/env";
 
 const credentialLogin = catchAsync(async (req: Request, res: Response) => {
   const loginInfo = await AuthServices.credentialLogin(req.body);
@@ -50,7 +53,7 @@ const logout = catchAsync(async (req: Request, res: Response) => {
 });
 
 const changePassword = catchAsync(async (req: Request, res: Response) => {
-  const { userId } = req.user;
+  const { userId } = req.user as JwtPayload;
   const { oldPassword, newPassword } = req.body;
 
   await AuthServices.changePassword(oldPassword, newPassword, userId);
@@ -63,9 +66,24 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const googleCallBackController = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  console.log(user);
+
+  if(!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  
+  const tokenInfo = createUserToken(user)
+  setAuthCookie(res, tokenInfo);
+
+  res.redirect("https://sajmul.com");
+});
+
 export const AuthControllers = {
   credentialLogin,
   getNewAccessToken,
   logout,
   changePassword,
+  googleCallBackController
 };
