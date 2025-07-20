@@ -58,7 +58,7 @@ export const globalErrorHandler = (
     success: false,
     message,
     errorSources,
-    error,
+    error: envVars.NODE_ENV === 'development' ? error : null,
     stack: envVars.NODE_ENV === "development" ? error.stack : null,
   });
 };
