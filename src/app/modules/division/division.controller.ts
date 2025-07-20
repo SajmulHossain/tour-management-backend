@@ -11,10 +11,12 @@ const getAllDivision = (req: Request, res: Response) => {
   });
 };
 
-const createDivision = (req: Request, res: Response) => {
+const createDivision = async (req: Request, res: Response) => {
+  const division  = await DivisionServices.createDivision(req.body);
+  
   sendResponse(res, {
     statusCode: 201,
-    data: null,
+    data: division,
     message: "",
     success: true,
   });
