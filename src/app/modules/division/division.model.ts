@@ -25,4 +25,19 @@ const divisionSchema = new Schema<IDivision>(
   }
 );
 
+divisionSchema.pre("save", async function (next) {
+  if (this.isModified("name")) {
+    let slug = this.name.toLocaleLowerCase().split(" ").join("-") + "-division";
+
+    let counter = 0;
+    while (await Division.exists({ slug })) {
+      slug = `${slug}-${++counter}`;
+    }
+
+    this.slug = slug;
+  }
+
+  next();
+});
+
 export const Division = model<IDivision>("Division", divisionSchema);

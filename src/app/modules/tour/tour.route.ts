@@ -23,4 +23,7 @@ router.patch(
   TourControllers.updateTourType
 );
 
+// * <-------- Tours Route ------->
+router.post("/", checkAuth(...Object.values(Role)), TourControllers.createTour);
+
 export const TourRoutes = router;

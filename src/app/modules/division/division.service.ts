@@ -6,11 +6,18 @@ const createDivision = async (payload: IDivision) => {
 
   if (isExistDivision) {
     throw new Error("A division with this name is already exist");
-  }
+  }  
 
-  const slug = payload.name.toLocaleLowerCase().split(" ").join("-") + "-division";
+  // let slug =
+  //   payload.name.toLocaleLowerCase().split(" ").join("-") + "-division";
 
-  payload.slug = slug;
+  // let counter = 0;
+  // while (await Division.exists({ slug })) {
+  //   slug = `${slug}-${++counter}`;
+  // }
+
+  // payload.slug = slug;
+
   const division = await Division.create(payload);
   return division;
 };
