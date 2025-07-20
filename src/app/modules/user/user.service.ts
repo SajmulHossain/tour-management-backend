@@ -1,4 +1,4 @@
-import bcrypt, { hash } from "bcryptjs";
+import { hash } from "bcryptjs";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../../config/env";
@@ -10,16 +10,13 @@ const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
   const isUserExist = await User.findOne({ email });
 
-  // if (isUserExist) {
-  //   throw new AppError(httpStatus.BAD_REQUEST, "User Already Exists");
-  // }
+  if (isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User Already Exists");
+  }
 
-  const hashedPassword = await bcrypt.hash(
-    password as string,
-    Number(envVars.BCRYPT_SALT_ROUND)
+  const hashedPassword = await hash(password as string, Number(envVars.BCRYPT_SALT_ROUND)
   );
 
-  console.log(hashedPassword);
 
   const authProvider: IAuthProvider = {
     provider: "credentials",
