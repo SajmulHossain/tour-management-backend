@@ -3,7 +3,7 @@ import { TourControllers } from "./tour.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
 import { validationRequest } from "../../middlewares/validateRequest";
-import { createTourTypeZodSchema } from "./tour.validation";
+import { createTourTypeZodSchema, createTourZodSchema } from "./tour.validation";
 
 const router = Router();
 
@@ -24,6 +24,6 @@ router.patch(
 );
 
 // * <-------- Tours Route ------->
-router.post("/", checkAuth(...Object.values(Role)), TourControllers.createTour);
+router.post("/", checkAuth(...Object.values(Role)),validationRequest(createTourZodSchema), TourControllers.createTour);
 
 export const TourRoutes = router;

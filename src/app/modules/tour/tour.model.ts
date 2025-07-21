@@ -35,4 +35,39 @@ const tourSchema = new Schema<ITour>(
   { timestamps: true, versionKey: false }
 );
 
+tourSchema.pre("save", async function (next) {
+  console.log(this);
+  if (this.isModified("title")) {
+    let slug = this.title.toLocaleLowerCase().split(" ").join("-") + "-tour";
+
+    let counter = 0;
+    while (await Tour.exists({ slug })) {
+      slug = `${slug}-${++counter}`;
+    }
+
+    this.slug = slug;
+  }
+
+  next();
+});
+
+tourSchema.pre("findOneAndUpdate", async function (next) {
+  const tour = this.getUpdate() as Partial<ITour>;
+  if (tour.title) {
+    let slug =
+      tour.title.toLocaleLowerCase().split(" ").join("-") + "-tour";
+
+    let counter = 0;
+    while (await Tour.exists({ slug })) {
+      slug = `${slug}-${++counter}`;
+    }
+
+    tour.slug = slug;
+  }
+
+  this.setUpdate(tour);
+
+  next();
+});
+
 export const Tour = model<ITour>("Tour", tourSchema);

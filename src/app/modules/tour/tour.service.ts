@@ -7,16 +7,9 @@ const createTour = async (payload: ITour) => {
     throw new Error("A tour with title already exists");
   }
 
-  let slug =
-    payload.title.toLocaleLowerCase().split(" ").join("-") + "-division";
+  const tour = await Tour.create(payload);
 
-  let counter = 0;
-  while (await Tour.exists({ slug })) {
-    slug = `${slug}-${++counter}`;
-  }
-  payload.slug = slug;
-
-  return null;
+  return tour;
 };
 
 export const TourServices = {
