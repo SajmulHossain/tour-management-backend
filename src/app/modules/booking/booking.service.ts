@@ -69,6 +69,7 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
       .populate("user", "name email phone address")
       .populate("tour", "title costFrom")
       .populate("payment");
+      
     const sslPayment = await SSLService.sslPaymentInit({
       address: (updatedBooking?.user as Partial<IUser>).address as string,
       amount,
