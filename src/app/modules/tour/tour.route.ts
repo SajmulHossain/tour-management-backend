@@ -21,13 +21,21 @@ router.post(
 );
 
 router.patch(
-  "/:tour-types/:id",
+  "/tour-types/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   validationRequest(createTourTypeZodSchema),
   TourControllers.updateTourType
 );
 
+router.delete(
+  "/tour-type/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  TourControllers.deleteTourType
+);
+
 // * <-------- Tours Route ------->
+router.get("/", TourControllers.getAllTour);
+
 router.post(
   "/",
   checkAuth(...Object.values(Role)),
@@ -40,6 +48,13 @@ router.patch(
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   validationRequest(updateTourZodSchema),
   TourControllers.updateTour
+);
+
+router.delete(
+  "/:id",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  validationRequest(updateTourZodSchema),
+  TourControllers.deleteTour
 );
 
 export const TourRoutes = router;

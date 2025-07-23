@@ -3,19 +3,63 @@ import { sendResponse } from "../../utils/sendResponse";
 import { TourServices } from "./tour.service";
 
 const createTourType = async (req: Request, res: Response) => {
-  console.log(req, res);
+  const tourType = await TourServices.createTourType(req.body);
+
+  sendResponse(res, {
+    data: tourType,
+    success: true,
+    message: "Tour type created successfully",
+    statusCode: 201,
+  });
 };
+
 const getAllTourTypes = async (req: Request, res: Response) => {
-  console.log(req, res);
+  const tourTypes = await TourServices.getAllTourTypes();
+
+  sendResponse(res, {
+    data: tourTypes,
+    success: true,
+    message: "All tour types retrived successfully",
+    statusCode: 200,
+  });
 };
+
 const updateTourType = async (req: Request, res: Response) => {
-  console.log(req, res);
+  const { id } = req.params;
+  const tourType = await TourServices.updateTourType(id, req.body);
+
+  sendResponse(res, {
+    data: tourType,
+    success: true,
+    message: "Tour type updated successfully",
+    statusCode: 201,
+  });
 };
+
 const deleteTourType = async (req: Request, res: Response) => {
-  console.log(req, res);
+  const { id } = req.params;
+  await TourServices.deleteTourType(id);
+
+  sendResponse(res, {
+    data: null,
+    success: true,
+    message: "Tours type deleted successfully",
+    statusCode: 200,
+  });
 };
 
 // * <----------- Tour Controllers -------------->
+const getAllTour = async (req: Request, res: Response) => {
+  const tours = await TourServices.getAllTour();
+
+  sendResponse(res, {
+    data: tours,
+    success: true,
+    message: "All Tours retrived successfully",
+    statusCode: 200,
+  });
+};
+
 const createTour = async (req: Request, res: Response) => {
   const tour = await TourServices.createTour(req.body);
 
@@ -27,7 +71,29 @@ const createTour = async (req: Request, res: Response) => {
   });
 };
 
-const updateTour = 
+const updateTour = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const tour = await TourServices.updateTour(id, req.body);
+
+  sendResponse(res, {
+    data: tour,
+    success: true,
+    message: "Tour updated successfully",
+    statusCode: 201,
+  });
+};
+
+const deleteTour = async (req:Request, res: Response) => {
+  const {id} = req.params;
+  await TourServices.deleteTour(id);
+
+   sendResponse(res, {
+     data: null,
+     success: true,
+     message: "Tour deleted successfully",
+     statusCode: 200,
+   });
+}
 
 export const TourControllers = {
   createTourType,
@@ -35,5 +101,7 @@ export const TourControllers = {
   deleteTourType,
   getAllTourTypes,
   createTour,
-  updateTour
+  updateTour,
+  getAllTour,
+  deleteTour
 };

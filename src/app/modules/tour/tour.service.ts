@@ -2,6 +2,18 @@ import AppError from "../../errorHelpers/AppError";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 
+const getAllTour = async () => {
+  const tours = await Tour.find();
+  const totalTours = await Tour.countDocuments();
+
+  return {
+    data: tours,
+    meta: {
+      total: totalTours,
+    },
+  };
+};
+
 const createTour = async (payload: ITour) => {
   const isExistTour = await Tour.findOne({ title: payload.title });
   if (isExistTour) {
@@ -31,6 +43,18 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
 const deleteTour = async (id: string) => {
   return await Tour.findByIdAndDelete(id);
 };
+
+// * -----tour types --------
+const createTourType = async (payload: ITourType) => {
+  const existingTourType = await TourType.findOne({ name: payload.name });
+
+  if (existingTourType) {
+    throw new Error("Tour type already exists.");
+  }
+
+  return await TourType.create({ name });
+};
+
 
 const getAllTourTypes = async () => {
   return await TourType.find();
@@ -64,4 +88,6 @@ export const TourServices = {
   getAllTourTypes,
   updateTourType,
   deleteTourType,
+  getAllTour,
+  createTourType
 };
