@@ -6,6 +6,8 @@ import { Booking } from "./booking.model";
 import { Payment } from "../payment/payment.model";
 import { PAYMET_STATUS } from "../payment/payment.interface";
 import { Tour } from "../tour/tour.model";
+import { SSLService } from "../sslCommerz/sslCommerz.service";
+import { IUser } from "../user/user.interface";
 
 const getTransactionId = (): string => {
   return `tran_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
@@ -25,11 +27,13 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
     }
 
     const booking = await Booking.create(
-      [{
-        user: userId,
-        status: BOOKING_STATUS.PENDING,
-        ...payload,
-      }],
+      [
+        {
+          user: userId,
+          status: BOOKING_STATUS.PENDING,
+          ...payload,
+        },
+      ],
       { session }
     );
 
@@ -44,12 +48,14 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
     const transactionId = getTransactionId();
 
     const payment = await Payment.create(
-      [{
-        booking: booking[0]._id,
-        status: PAYMET_STATUS.UNPAID,
-        transactionId,
-        amount,
-      }],
+      [
+        {
+          booking: booking[0]._id,
+          status: PAYMET_STATUS.UNPAID,
+          transactionId,
+          amount,
+        },
+      ],
       { session }
     );
 
@@ -59,11 +65,22 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
         payment: payment[0]._id,
       },
       { new: true, runValidators: true, session }
-    );
+    )
+      .populate("user", "name email phone address")
+      .populate("tour", "title costFrom")
+      .populate("payment");
+    const sslPayment = await SSLService.sslPaymentInit({
+      address: (updatedBooking?.user as Partial<IUser>).address as string,
+      amount,
+      email: (updatedBooking?.user as Partial<IUser>).email as string,
+      name: (updatedBooking?.user as Partial<IUser>).name as string,
+      phoneNumber: (updatedBooking?.user as Partial<IUser>).phone as string,
+      transactionId,
+    });
 
     await session.commitTransaction();
     session.endSession();
-    return updatedBooking;
+    return { booking: updatedBooking, paymentUrl: sslPayment.GatewayPageURL };
   } catch (error) {
     await session.abortTransaction(); // * transaction rollback
     session.endSession();
