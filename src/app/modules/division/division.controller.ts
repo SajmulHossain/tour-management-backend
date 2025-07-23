@@ -3,11 +3,14 @@ import { sendResponse } from "../../utils/sendResponse";
 import { DivisionServices } from "./division.service";
 
 const getAllDivisions = async (req: Request, res: Response) => {
-  const divisions = await DivisionServices.getAllDivisions();
+  const { data, meta } = await DivisionServices.getAllDivisions(
+    req.query as Record<string, string>
+  );
 
   sendResponse(res, {
     statusCode: 201,
-    data: divisions,
+    data,
+    meta,
     message: "Division Retrived Successfully",
     success: true,
   });

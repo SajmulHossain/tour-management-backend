@@ -1,10 +1,19 @@
+import { QueryBuilder } from "../../utils/QueryBuilder";
 import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
 
-const getAllDivisions = async() => {
-  const divisons = await Division.find();
+const getAllDivisions = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(Division.find(), query);
 
-  return divisons;
+  const [data, meta] = await Promise.all([
+    queryBuilder.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return {
+    data,
+    meta,
+  };
 };
 
 const getSingleDivision = async (slug: string) => {
