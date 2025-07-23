@@ -15,10 +15,6 @@ const deleteTourType = async (req: Request, res: Response) => {
   console.log(req, res);
 };
 
-const getAllTours = async (req: Request, res: Response) => {
-  console.log(req, res);
-};
-
 // * <----------- Tour Controllers -------------->
 const createTour = async (req: Request, res: Response) => {
   const tour = await TourServices.createTour(req.body);
@@ -31,11 +27,13 @@ const createTour = async (req: Request, res: Response) => {
   });
 };
 
+const updateTour = 
+
 export const TourControllers = {
   createTourType,
   updateTourType,
   deleteTourType,
-  getAllTours,
   getAllTourTypes,
   createTour,
+  updateTour
 };
