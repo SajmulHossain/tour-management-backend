@@ -4,12 +4,13 @@ import { DivisionRoutes } from "../modules/division/division.route";
 import { UserRoutes } from "./../modules/user/user.route";
 import { TourRoutes } from "../modules/tour/tour.route";
 import { BookingRoutes } from "../modules/booking/booking.route";
+import { PaymentRoutes } from "../modules/payment/payment.route";
 
 export const router = Router();
 
 interface IRouter {
-  path: string,
-  route: Router
+  path: string;
+  route: Router;
 }
 
 const moduleRoutes: IRouter[] = [
@@ -26,13 +27,17 @@ const moduleRoutes: IRouter[] = [
     route: DivisionRoutes,
   },
   {
-    path: '/tour',
-    route: TourRoutes
+    path: "/tour",
+    route: TourRoutes,
   },
   {
-    path: '/booking',
-    route: BookingRoutes
-  }
+    path: "/booking",
+    route: BookingRoutes,
+  },
+  {
+    path: "/payment",
+    route: PaymentRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => {
