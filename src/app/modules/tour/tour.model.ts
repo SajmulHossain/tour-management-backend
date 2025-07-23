@@ -31,6 +31,8 @@ const tourSchema = new Schema<ITour>(
     division: { type: Schema.Types.ObjectId, required: true, ref: "Division" },
     maxGuest: { type: Number },
     minAge: { type: Number },
+    departureLocation: { type: String },
+    arrivalLocation: { type: String },
   },
   { timestamps: true, versionKey: false }
 );
@@ -53,8 +55,7 @@ tourSchema.pre("save", async function (next) {
 tourSchema.pre("findOneAndUpdate", async function (next) {
   const tour = this.getUpdate() as Partial<ITour>;
   if (tour.title) {
-    let slug =
-      tour.title.toLocaleLowerCase().split(" ").join("-");
+    let slug = tour.title.toLocaleLowerCase().split(" ").join("-");
 
     let counter = 0;
     while (await Tour.exists({ slug })) {

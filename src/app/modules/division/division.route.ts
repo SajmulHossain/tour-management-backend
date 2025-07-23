@@ -10,7 +10,7 @@ import {
 
 const router = Router();
 
-router.get("/", DivisionControllers.getAllDivision);
+router.get("/", DivisionControllers.getAllDivisions);
 
 router.post(
   "/create",
@@ -18,6 +18,8 @@ router.post(
   validationRequest(createDivisionSchema),
   DivisionControllers.createDivision
 );
+
+router.get("/:slug", DivisionControllers.getSingleDivision);
 
 router.patch(
   "/:id",
