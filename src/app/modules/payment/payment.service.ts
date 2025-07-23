@@ -15,16 +15,16 @@ const initPayment = async (id: string) => {
 
   const booking = await Booking.findById(payment.booking);
 
-      const sslPayment = await SSLService.sslPaymentInit({
-        address: (booking?.user as Partial<IUser>).address as string,
-        amount: payment.amount,
-        email: (booking?.user as Partial<IUser>).email as string,
-        name: (booking?.user as Partial<IUser>).name as string,
-        phoneNumber: (booking?.user as Partial<IUser>).phone as string,
-        transactionId: payment.transactionId,
-      });
+  const sslPayment = await SSLService.sslPaymentInit({
+    address: (booking?.user as Partial<IUser>).address as string,
+    amount: payment.amount,
+    email: (booking?.user as Partial<IUser>).email as string,
+    name: (booking?.user as Partial<IUser>).name as string,
+    phoneNumber: (booking?.user as Partial<IUser>).phone as string,
+    transactionId: payment.transactionId,
+  });
 
-      return sslPayment.GatewayPageURL;
+  return sslPayment.GatewayPageURL;
 };
 
 const successPayment = async (query: Record<string, string>) => {
