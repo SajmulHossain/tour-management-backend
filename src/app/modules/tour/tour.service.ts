@@ -1,13 +1,31 @@
+import { excludeFields } from "../../constant";
 import AppError from "../../errorHelpers/AppError";
+import { tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 
-const getAllTour = async () => {
-  const tours = await Tour.find();
-  const totalTours = await Tour.countDocuments();
+const getAllTour = async (query: Record<string, string>) => {
+  const filter = query;
+  const search = query.search || "";
+  const sort = query.sort || "-createdAt";
+
+  for(const field of excludeFields) {
+     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+     delete filter[field];
+  }
+
+  const searchQuery = {
+    $or: tourSearchableFields.map((field) => ({
+      [field]: { $regex: search, $options: "i" },
+    })),
+  };
+
+  const tours = await Tour.find(searchQuery).find(filter).sort(sort);
+
+  const totalTours = await Tour.countDocuments(searchQuery);
 
   return {
-    data: tours,
+    tours,
     meta: {
       total: totalTours,
     },
@@ -52,9 +70,8 @@ const createTourType = async (payload: ITourType) => {
     throw new Error("Tour type already exists.");
   }
 
-  return await TourType.create({ name });
+  return await TourType.create(payload);
 };
-
 
 const getAllTourTypes = async () => {
   return await TourType.find();
@@ -89,5 +106,5 @@ export const TourServices = {
   updateTourType,
   deleteTourType,
   getAllTour,
-  createTourType
+  createTourType,
 };

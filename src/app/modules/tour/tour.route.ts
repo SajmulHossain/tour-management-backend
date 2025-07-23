@@ -8,8 +8,15 @@ import {
   createTourZodSchema,
   updateTourZodSchema,
 } from "./tour.validation";
+import { Tour } from "./tour.model";
 
 const router = Router();
+
+router.post("/many", async(req, res) => {
+  await Tour.create(req.body)
+  
+  res.send({message: "done"})
+})
 
 router.get("/tour-types", TourControllers.getAllTourTypes);
 
@@ -21,7 +28,7 @@ router.post(
 );
 
 router.patch(
-  "/tour-types/:id",
+  "/tour-type/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   validationRequest(createTourTypeZodSchema),
   TourControllers.updateTourType

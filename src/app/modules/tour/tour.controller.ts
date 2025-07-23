@@ -50,10 +50,12 @@ const deleteTourType = async (req: Request, res: Response) => {
 
 // * <----------- Tour Controllers -------------->
 const getAllTour = async (req: Request, res: Response) => {
-  const tours = await TourServices.getAllTour();
+  const query = req.query;
+  const tours = await TourServices.getAllTour(query as Record<string, string>);
 
   sendResponse(res, {
-    data: tours,
+    data: tours.tours,
+    meta:tours.meta,
     success: true,
     message: "All Tours retrived successfully",
     statusCode: 200,
