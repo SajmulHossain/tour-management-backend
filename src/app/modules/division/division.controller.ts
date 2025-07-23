@@ -2,18 +2,32 @@ import { Request, Response } from "express";
 import { sendResponse } from "../../utils/sendResponse";
 import { DivisionServices } from "./division.service";
 
-const getAllDivision = (req: Request, res: Response) => {
+const getAllDivisions = async (req: Request, res: Response) => {
+  const divisions = await DivisionServices.getAllDivisions();
+
   sendResponse(res, {
     statusCode: 201,
-    data: null,
-    message: "",
+    data: divisions,
+    message: "Division Retrived Successfully",
+    success: true,
+  });
+};
+
+const getSingleDivision = async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const division = await DivisionServices.getSingleDivision(slug);
+
+  sendResponse(res, {
+    statusCode: 201,
+    data: division,
+    message: "Division Retrived Successfully",
     success: true,
   });
 };
 
 const createDivision = async (req: Request, res: Response) => {
-  const division  = await DivisionServices.createDivision(req.body);
-  
+  const division = await DivisionServices.createDivision(req.body);
+
   sendResponse(res, {
     statusCode: 201,
     data: division,
@@ -37,7 +51,7 @@ const updateDivision = async (req: Request, res: Response) => {
 const deleteDivision = async (req: Request, res: Response) => {
   const { id } = req.params;
   await DivisionServices.deleteDivision(id);
-  
+
   sendResponse(res, {
     statusCode: 201,
     data: null,
@@ -48,7 +62,8 @@ const deleteDivision = async (req: Request, res: Response) => {
 
 export const DivisionControllers = {
   createDivision,
-  getAllDivision,
+  getAllDivisions,
   updateDivision,
   deleteDivision,
+  getSingleDivision,
 };

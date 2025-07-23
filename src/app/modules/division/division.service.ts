@@ -1,12 +1,24 @@
 import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
 
+const getAllDivisions = async() => {
+  const divisons = await Division.find();
+
+  return divisons;
+};
+
+const getSingleDivision = async (slug: string) => {
+  const divison = await Division.findOne({ slug });
+
+  return divison;
+};
+
 const createDivision = async (payload: IDivision) => {
   const isExistDivision = await Division.findOne({ name: payload.name });
 
   if (isExistDivision) {
     throw new Error("A division with this name is already exist");
-  }  
+  }
 
   // let slug =
   //   payload.name.toLocaleLowerCase().split(" ").join("-") + "-division";
@@ -55,4 +67,6 @@ export const DivisionServices = {
   updateDivision,
   deleteDivision,
   createDivision,
+  getSingleDivision,
+  getAllDivisions,
 };
