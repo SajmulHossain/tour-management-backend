@@ -11,31 +11,81 @@ const successPayment = async (query: Record<string, string>) => {
     const updatedPayment = await Payment.findOneAndUpdate(
       { transactionId: query.transactionId },
       { status: PAYMET_STATUS.PAID },
-      { session, runValidators: true, new: true }
+      { session, runValidators: true }
     );
 
     await Booking.findByIdAndUpdate(
       updatedPayment?.booking,
       { status: BOOKING_STATUS.COMPLETE },
-      { session, runValidators: true, new: true }
-    )
-      .populate("user", "name email phone address")
-      .populate("tour", "title costFrom")
-      .populate("payment");
+      { session, runValidators: true }
+    );
 
-      await session.commitTransaction();
-      session.endSession();
-
-      return {success: true, message: 'Payment Completed'}
-  } catch (error) {
-    await session.abortTransaction()
+    await session.commitTransaction();
     session.endSession();
-    console.log(error);
+
+    return { success: true, message: "Payment Completed" };
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
 };
 
-const failPayment = () => {};
-const cancelPayment = () => {};
+const failPayment = async (query: Record<string, string>) => {
+  const session = await Booking.startSession();
+  session.startTransaction();
+
+  try {
+    const updatedPayment = await Payment.findOneAndUpdate(
+      { transactionId: query.transactionId },
+      { status: PAYMET_STATUS.FAILED },
+      { session, runValidators: true }
+    );
+
+    await Booking.findByIdAndUpdate(
+      updatedPayment?.booking,
+      { status: BOOKING_STATUS.FAILED },
+      { session, runValidators: true }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return { success: true, message: "Payment Completed" };
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
+};
+
+const cancelPayment = async (query: Record<string, string>) => {
+  const session = await Booking.startSession();
+  session.startTransaction();
+
+  try {
+    const updatedPayment = await Payment.findOneAndUpdate(
+      { transactionId: query.transactionId },
+      { status: PAYMET_STATUS.CANCELD },
+      { session, runValidators: true }
+    );
+
+    await Booking.findByIdAndUpdate(
+      updatedPayment?.booking,
+      { status: BOOKING_STATUS.CANCELD },
+      { session, runValidators: true }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return { success: true, message: "Payment Completed" };
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
+};
 
 export const PaymentService = {
   successPayment,
