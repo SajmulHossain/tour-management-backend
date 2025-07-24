@@ -12,12 +12,10 @@ export const deleteImageFromCloudinary = async (url: string) => {
   try {
     const regex = /\/v\d+\/(.*?)\.(jpg|jpeg|png|gif|webp)$/i;
     const match = url.match(regex);
-    console.log(match);
 
     if (match && match[1]) {
       const public_id = match[1];
       await cloudinary.uploader.destroy(public_id);
-      console.log(`File ${public_id} is deleted from cloudinary`);
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
