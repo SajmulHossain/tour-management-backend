@@ -1,23 +1,19 @@
 import { Router } from "express";
-import { TourControllers } from "./tour.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
-import { Role } from "../user/user.interface";
 import { validationRequest } from "../../middlewares/validateRequest";
+import { Role } from "../user/user.interface";
+import { TourControllers } from "./tour.controller";
 import {
   createTourTypeZodSchema,
   createTourZodSchema,
   updateTourZodSchema,
 } from "./tour.validation";
-import { Tour } from "./tour.model";
+import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
 
-router.post("/many", async(req, res) => {
-  await Tour.create(req.body)
-  
-  res.send({message: "done"})
-})
 
+// * <........Tour Type...........>
 router.get("/tour-types", TourControllers.getAllTourTypes);
 
 router.post(
@@ -46,6 +42,7 @@ router.get("/", TourControllers.getAllTour);
 router.post(
   "/",
   checkAuth(...Object.values(Role)),
+  multerUpload.array("files"),
   validationRequest(createTourZodSchema),
   TourControllers.createTour
 );

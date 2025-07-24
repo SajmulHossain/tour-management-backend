@@ -51,7 +51,9 @@ const deleteTourType = async (req: Request, res: Response) => {
 // * <----------- Tour Controllers -------------->
 const getAllTour = async (req: Request, res: Response) => {
   const query = req.query;
-  const {data, meta} = await TourServices.getAllTour(query as Record<string, string>);
+  const { data, meta } = await TourServices.getAllTour(
+    query as Record<string, string>
+  );
 
   sendResponse(res, {
     data,
@@ -63,7 +65,12 @@ const getAllTour = async (req: Request, res: Response) => {
 };
 
 const createTour = async (req: Request, res: Response) => {
-  const tour = await TourServices.createTour(req.body);
+  const payload = {
+    ...req.body,
+    images: (req.files as Express.Multer.File[])?.map((file) => file.path),
+  };
+
+  const tour = await TourServices.createTour(payload);
 
   sendResponse(res, {
     data: tour,
@@ -85,17 +92,17 @@ const updateTour = async (req: Request, res: Response) => {
   });
 };
 
-const deleteTour = async (req:Request, res: Response) => {
-  const {id} = req.params;
+const deleteTour = async (req: Request, res: Response) => {
+  const { id } = req.params;
   await TourServices.deleteTour(id);
 
-   sendResponse(res, {
-     data: null,
-     success: true,
-     message: "Tour deleted successfully",
-     statusCode: 200,
-   });
-}
+  sendResponse(res, {
+    data: null,
+    success: true,
+    message: "Tour deleted successfully",
+    statusCode: 200,
+  });
+};
 
 export const TourControllers = {
   createTourType,
@@ -105,5 +112,5 @@ export const TourControllers = {
   createTour,
   updateTour,
   getAllTour,
-  deleteTour
+  deleteTour,
 };
