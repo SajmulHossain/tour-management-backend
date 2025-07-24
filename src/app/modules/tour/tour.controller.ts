@@ -82,7 +82,11 @@ const createTour = async (req: Request, res: Response) => {
 
 const updateTour = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const tour = await TourServices.updateTour(id, req.body);
+  const payload = {
+    ...req.body,
+    images: (req.files as Express.Multer.File[])?.map((file) => file.path),
+  };
+  const tour = await TourServices.updateTour(id, payload);
 
   sendResponse(res, {
     data: tour,
