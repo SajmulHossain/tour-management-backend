@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { envVars } from "../../config/env";
+import { envVars } from "../../config/env.config";
 import { ISSLCommerz } from "./ssLCommerz.interface";
 import AppError from '../../errorHelpers/AppError';
 

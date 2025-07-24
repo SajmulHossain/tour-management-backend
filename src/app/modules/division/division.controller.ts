@@ -29,12 +29,15 @@ const getSingleDivision = async (req: Request, res: Response) => {
 };
 
 const createDivision = async (req: Request, res: Response) => {
-  const division = await DivisionServices.createDivision(req.body);
+  const division = await DivisionServices.createDivision({
+    ...req.body,
+    thumbnail: req.file?.path,
+  });
 
   sendResponse(res, {
     statusCode: 201,
     data: division,
-    message: "",
+    message: "Divison Created",
     success: true,
   });
 };

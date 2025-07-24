@@ -5,7 +5,7 @@ import {
   Profile,
   VerifyCallback,
 } from "passport-google-oauth20";
-import { envVars } from "./env";
+import { envVars } from "./env.config";
 import { User } from "../modules/user/user.model";
 import { Role } from "../modules/user/user.interface";
 import { Strategy as LocalStrategy } from "passport-local";

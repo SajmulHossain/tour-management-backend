@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { envVars } from "../../config/env";
+import { envVars } from "../../config/env.config";
 import { catchAsync } from "../../utils/catchAsync";
 import { PaymentService } from "./payment.service";
 import { sendResponse } from "../../utils/sendResponse";
