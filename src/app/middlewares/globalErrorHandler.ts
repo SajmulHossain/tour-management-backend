@@ -9,14 +9,26 @@ import {
   handleZodError,
 } from "../helpers/globalErrorHelpers";
 import { TErrorSources } from "../interfaces/error.types";
+import { deleteImageFromCloudinary } from "../config/cloudinary.config";
 
-export const globalErrorHandler = (
+export const globalErrorHandler = async (
   error: any,
   req: Request,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) => {
+  if (req.file) {
+    await deleteImageFromCloudinary(req.file.path);
+  }
+
+  if (req.files && req.files.length) {
+    const imgUrl = (req.files as Express.Multer.File[]).map(
+      (file) => file.path
+    );
+    await Promise.all(imgUrl.map((url) => deleteImageFromCloudinary(url)));
+  }
+
   let statusCode = 500;
   let message = "Something Went Wrong";
   let errorSources: TErrorSources[] | undefined = [];
@@ -58,7 +70,7 @@ export const globalErrorHandler = (
     success: false,
     message,
     errorSources,
-    error: envVars.NODE_ENV === 'development' ? error : null,
+    error: envVars.NODE_ENV === "development" ? error : null,
     stack: envVars.NODE_ENV === "development" ? error.stack : null,
   });
 };
