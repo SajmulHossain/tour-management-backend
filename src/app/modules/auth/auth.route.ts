@@ -18,9 +18,24 @@ router.post(
   AuthControllers.changePassword
 );
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+router.post(
+  "/reset-password",
+  checkAuth(...Object.values(Role)),
+  AuthControllers.resetPassword
+);
+
+router.post(
+  "/set-password",
+  checkAuth(...Object.values(Role)),
+  AuthControllers.setPassword
+);
+
 router.get("/google", (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
+  passport.authenticate("google", { scope: ["profile", "email"] })(
+    req,
+    res,
+    next
+  );
 });
 
 router.get(
