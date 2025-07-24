@@ -29,10 +29,12 @@ const getSingleDivision = async (req: Request, res: Response) => {
 };
 
 const createDivision = async (req: Request, res: Response) => {
-  const division = await DivisionServices.createDivision({
+  const payload = {
     ...req.body,
     thumbnail: req.file?.path,
-  });
+  };
+
+  const division = await DivisionServices.createDivision(payload);
 
   sendResponse(res, {
     statusCode: 201,
@@ -44,7 +46,12 @@ const createDivision = async (req: Request, res: Response) => {
 
 const updateDivision = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const division = await DivisionServices.updateDivision(id, req.body);
+
+    const payload = {
+      ...req.body,
+      thumbnail: req.file?.path,
+    };
+  const division = await DivisionServices.updateDivision(id, payload);
 
   sendResponse(res, {
     data: division,

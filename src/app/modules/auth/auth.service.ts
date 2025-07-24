@@ -6,7 +6,7 @@ import {
   createNewAccessTokenWithRefreshToken,
   createUserToken,
 } from "../../utils/userToken";
-import { IUser } from "../user/user.interface";
+import { IAuthProvider, IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 
 const credentialLogin = async (payload: Partial<IUser>) => {
@@ -66,8 +66,48 @@ const changePassword = async (
     password: await hash(newPassword, Number(envVars.BCRYPT_SALT_ROUND)),
   });
 };
+
+const resetPassword = () => {
+  return;
+};
+
+const setPassword = async (userId: string, password: string) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
+
+  if (
+    user.password &&
+    user.auths.some((providerObj) => providerObj.provider === "google")
+  ) {
+    throw new AppError(
+      400,
+      "You have already set your password. Now you can change your password from profile"
+    );
+  }
+
+  const hashedPassword = await hash(
+    password,
+    Number(envVars.BCRYPT_SALT_ROUND)
+  );
+
+  const auths: IAuthProvider[] = [
+    ...user.auths,
+    { provider: "credentials", providerId: user.email },
+  ];
+
+  user.password = hashedPassword;
+  user.auths = auths;
+
+  await user.save();
+};
+
 export const AuthServices = {
   credentialLogin,
   getNewAccessToken,
   changePassword,
+  resetPassword,
+  setPassword,
 };
