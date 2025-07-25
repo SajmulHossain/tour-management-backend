@@ -9,6 +9,7 @@ import { clearAuthCookies, setAuthCookie } from "../../utils/setCookies";
 import { createUserToken } from "../../utils/userToken";
 import { AuthServices } from "./auth.service";
 import passport from "passport";
+import { envVars } from "../../config/env.config";
 
 const credentialLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -18,7 +19,7 @@ const credentialLogin = catchAsync(
         // return new AppError(401, err);
         // return next(err);
 
-        return next(new AppError(401, err));
+        return next(new AppError(err.statusCode || 401, err));
       }
 
       if (!user) {
@@ -92,6 +93,7 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
   console.log(req, res);
 });
+
 const setPassword = catchAsync(async (req: Request, res: Response) => {
   const decodedToken = req.user as JwtPayload;
   const { password } = req.body;
@@ -106,10 +108,28 @@ const setPassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  await AuthServices.forgotPassword(email)
+
+  sendResponse(res, {
+    success:true,
+    statusCode: 200,
+    message: 'Email sent successfully',
+    data: null
+  })
+})
+
 const googleCallBackController = catchAsync(
   async (req: Request, res: Response) => {
+    let redirectTo = req.query.state ? (req.query.state as string) : "";
+
+    if (redirectTo.startsWith("/")) {
+      redirectTo = redirectTo.slice(1);
+    }
+
     const user = req.user;
-    console.log(user);
 
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, "User not found");
@@ -118,7 +138,7 @@ const googleCallBackController = catchAsync(
     const tokenInfo = createUserToken(user);
     setAuthCookie(res, tokenInfo);
 
-    res.redirect("https://sajmul.com");
+    res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
   }
 );
 
@@ -129,5 +149,5 @@ export const AuthControllers = {
   logout,
   changePassword,
   googleCallBackController,
-  setPassword,
+  setPassword,forgotPassword
 };

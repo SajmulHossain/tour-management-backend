@@ -5,6 +5,7 @@ import { AuthControllers } from "./auth.controller";
 import { validationRequest } from "../../middlewares/validateRequest";
 import { changePasswordZodSchema } from "../user/user.validation";
 import passport from "passport";
+import { envVars } from "../../config/env.config";
 
 const router = Router();
 
@@ -30,6 +31,8 @@ router.post(
   AuthControllers.setPassword
 );
 
+router.post("/forgot-password", AuthControllers.forgotPassword)
+
 router.get("/google", (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate("google", { scope: ["profile", "email"] })(
     req,
@@ -40,7 +43,7 @@ router.get("/google", (req: Request, res: Response, next: NextFunction) => {
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
+  passport.authenticate("google", { failureRedirect: `${envVars.FRONTEND_URL}/login?error=There is some issues with your account. Contact with admin`}),
   AuthControllers.googleCallBackController
 );
 

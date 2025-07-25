@@ -81,7 +81,7 @@ const updateUser = async (
 };
 
 const getAllUser = async () => {
-  const users = await User.find({});
+  const users = await User.find({}).select("-password");
   const totalUser = await User.countDocuments();
 
   return {
@@ -92,8 +92,14 @@ const getAllUser = async () => {
   };
 };
 
+const getMe = async (id: string) => {
+  const user = await User.findById(id).select("-password");
+
+  return user;
+};
+
 export const UserServices = {
   createUser,
   getAllUser,
-  updateUser,
+  updateUser,getMe
 };
