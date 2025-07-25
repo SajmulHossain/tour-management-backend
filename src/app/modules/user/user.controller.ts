@@ -41,7 +41,7 @@ const updateUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.params.id;
     const verifiedToken = req.user as JwtPayload;
-    const user = await UserServices.updateUser(userId,req.body,verifiedToken);
+    const user = await UserServices.updateUser(userId, req.body, verifiedToken);
 
     sendResponse(res, {
       statusCode: httpStatus.CREATED,
@@ -65,10 +65,24 @@ const getAllUsers = catchAsync(
   }
 );
 
+const getMe = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user as JwtPayload;
+    const me = await UserServices.getMe(decodedToken.userId);
+
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: "User retrived successfully",
+      data: me
+    });
+  }
+);
+
 export const UserControllers = {
   createUser,
   getAllUsers,
-  updateUser
+  updateUser,
+  getMe,
 };
 
 // * routing matching -> controllers -> service -> model -> DB

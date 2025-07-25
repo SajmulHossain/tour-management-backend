@@ -19,7 +19,7 @@ const credentialLogin = catchAsync(
         // return new AppError(401, err);
         // return next(err);
 
-        return next(new AppError(401, err));
+        return next(new AppError(err.statusCode || 401, err));
       }
 
       if (!user) {
@@ -93,6 +93,7 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
   console.log(req, res);
 });
+
 const setPassword = catchAsync(async (req: Request, res: Response) => {
   const decodedToken = req.user as JwtPayload;
   const { password } = req.body;
@@ -106,6 +107,19 @@ const setPassword = catchAsync(async (req: Request, res: Response) => {
     data: null,
   });
 });
+
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  await AuthServices.forgotPassword(email)
+
+  sendResponse(res, {
+    success:true,
+    statusCode: 200,
+    message: 'Email sent successfully',
+    data: null
+  })
+})
 
 const googleCallBackController = catchAsync(
   async (req: Request, res: Response) => {
@@ -135,5 +149,5 @@ export const AuthControllers = {
   logout,
   changePassword,
   googleCallBackController,
-  setPassword,
+  setPassword,forgotPassword
 };

@@ -1,6 +1,4 @@
-import { hashPassword, hashPassword } from "./../../utils/hashPassword";
 import { compare, hash } from "bcryptjs";
-import bcrypt from "bcryptjs";
 import httpStatus from "http-status-codes";
 import { envVars } from "../../config/env.config";
 import AppError from "../../errorHelpers/AppError";
@@ -8,8 +6,11 @@ import {
   createNewAccessTokenWithRefreshToken,
   createUserToken,
 } from "../../utils/userToken";
-import { IAuthProvider, IUser } from "../user/user.interface";
+import { IAuthProvider, IsActive, IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
+import { hashPassword } from "./../../utils/hashPassword";
+import jwt from "jsonwebtoken";
+import { sendEmail } from "../../utils/sendEmail";
 
 const credentialLogin = async (payload: Partial<IUser>) => {
   const { email, password } = payload;
@@ -103,10 +104,56 @@ const setPassword = async (userId: string, password: string) => {
   await user.save();
 };
 
+const forgotPassword = async (email: string) => {
+  const isUserExist = await User.findOne({ email });
+
+  if (!isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User does not exist");
+  }
+  if (!isUserExist.isVerified) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is not verified");
+  }
+  if (
+    isUserExist.isActive === IsActive.BLOCKED ||
+    isUserExist.isActive === IsActive.INACTIVE
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `User is ${isUserExist.isActive}`
+    );
+  }
+  if (isUserExist.isDeleted) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
+  }
+
+  const jwtPayload = {
+    userId: isUserExist._id,
+    email: isUserExist.email,
+    role: isUserExist.role,
+  };
+
+  const resetToken = jwt.sign(jwtPayload, envVars.JWT_ACCESS_SECRET, {
+    expiresIn: "10m",
+  });
+
+  const resetUILink = `${envVars.FRONTEND_URL}/reset-password?id=${isUserExist._id}&token=${resetToken}`;
+
+  sendEmail({
+    to: isUserExist.email,
+    subject: "Password Reset",
+    templateName: "forgotPassword",
+    templateData: {
+      name: isUserExist.name,
+      resetUILink,
+    },
+  });
+};
+
 export const AuthServices = {
   credentialLogin,
   getNewAccessToken,
   changePassword,
   resetPassword,
   setPassword,
+  forgotPassword,
 };

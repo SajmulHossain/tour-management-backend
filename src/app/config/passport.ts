@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { compare } from "bcryptjs";
 import passport from "passport";
 import {
   Strategy as GoogleStrategy,
   Profile,
   VerifyCallback,
 } from "passport-google-oauth20";
-import { envVars } from "./env.config";
-import { User } from "../modules/user/user.model";
-import { IsActive, Role } from "../modules/user/user.interface";
 import { Strategy as LocalStrategy } from "passport-local";
-import { compare } from "bcryptjs";
+import { IsActive, Role } from "../modules/user/user.interface";
+import { User } from "../modules/user/user.model";
+import { envVars } from "./env.config";
 
 passport.use(
   new LocalStrategy(
@@ -25,6 +25,18 @@ passport.use(
           // return done(null, false, { message: "User does not exist" });
           return done("User does not exist");
         }
+
+         if (
+           isUserExist.isActive === IsActive.BLOCKED ||
+           isUserExist.isActive === IsActive.INACTIVE
+         ) {
+          return done(`User is ${isUserExist.isActive}`);
+         }
+
+         if (isUserExist.isDeleted) {
+          return done("User is deleted");
+         }
+
 
         // * checking if the user is google authenticated, because it will skip the password
         const isGoogleAuthenticated = isUserExist.auths.some(
