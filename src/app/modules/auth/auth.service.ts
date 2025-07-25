@@ -1,4 +1,6 @@
+import { hashPassword, hashPassword } from "./../../utils/hashPassword";
 import { compare, hash } from "bcryptjs";
+import bcrypt from "bcryptjs";
 import httpStatus from "http-status-codes";
 import { envVars } from "../../config/env.config";
 import AppError from "../../errorHelpers/AppError";
@@ -88,10 +90,7 @@ const setPassword = async (userId: string, password: string) => {
     );
   }
 
-  const hashedPassword = await hash(
-    password,
-    Number(envVars.BCRYPT_SALT_ROUND)
-  );
+  const hashedPassword = await hashPassword(password);
 
   const auths: IAuthProvider[] = [
     ...user.auths,
