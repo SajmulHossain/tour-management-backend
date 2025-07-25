@@ -91,7 +91,17 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
-  console.log(req, res);
+const decodedToken = req.user as JwtPayload;
+
+await AuthServices.resetPassword(req.body, decodedToken);
+
+sendResponse(res, {
+  success: true,
+  statusCode: 200,
+  message: "Passoword reset successfully",
+  data: null,
+});
+
 });
 
 const setPassword = catchAsync(async (req: Request, res: Response) => {
