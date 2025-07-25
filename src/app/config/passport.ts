@@ -7,7 +7,7 @@ import {
 } from "passport-google-oauth20";
 import { envVars } from "./env.config";
 import { User } from "../modules/user/user.model";
-import { Role } from "../modules/user/user.interface";
+import { IsActive, Role } from "../modules/user/user.interface";
 import { Strategy as LocalStrategy } from "passport-local";
 import { compare } from "bcryptjs";
 
@@ -27,16 +27,16 @@ passport.use(
         }
 
         // * checking if the user is google authenticated, because it will skip the password
-        const isGoogleAuthenticated = isUserExist.auths.some(auth => auth.provider === "google");
+        const isGoogleAuthenticated = isUserExist.auths.some(
+          (auth) => auth.provider === "google"
+        );
 
-        if(isGoogleAuthenticated && !isUserExist.password) {
+        if (isGoogleAuthenticated && !isUserExist.password) {
           // return done(null, false, {message: "You are google authenticated. Login in with google or set a password"})
           return done(
             "You are google authenticated. Login in with google or set a password"
           );
         }
-
-
 
         const isPasswordMatched = await compare(
           password as string,
@@ -68,30 +68,46 @@ passport.use(
       profile: Profile,
       done: VerifyCallback
     ) => {
-      const email = profile.emails?.[0].value;
+      try {
+        const email = profile.emails?.[0].value;
 
-      if (!email) {
-        return done(null, false, { message: "No email found" });
-      }
+        if (!email) {
+          return done(null, false, { message: "No email found" });
+        }
 
-      let user = await User.findOne({ email });
+        let user = await User.findOne({ email });
 
-      if (!user) {
-        user = await User.create({
-          email,
-          name: profile.displayName,
-          picture: profile.photos?.[0].value,
-          role: Role.USER,
-          isVerified: true,
-          auths: [
-            {
-              provider: "google",
-              providerId: profile.id,
-            },
-          ],
-        });
+        if (
+          user &&
+          (user.isActive === IsActive.BLOCKED ||
+            user.isActive === IsActive.INACTIVE)
+        ) {
+          return done(`User is ${user.isActive}`);
+        }
+
+        if (user && user.isDeleted) {
+          return done(null, false, { message: "User is deleted" });
+        }
+
+        if (!user) {
+          user = await User.create({
+            email,
+            name: profile.displayName,
+            picture: profile.photos?.[0].value,
+            role: Role.USER,
+            isVerified: true,
+            auths: [
+              {
+                provider: "google",
+                providerId: profile.id,
+              },
+            ],
+          });
+        }
 
         return done(null, user);
+      } catch (error) {
+        return done(error);
       }
     }
   )
