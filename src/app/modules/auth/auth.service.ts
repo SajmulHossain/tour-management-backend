@@ -9,7 +9,7 @@ import {
 import { IAuthProvider, IsActive, IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 import { hashPassword } from "./../../utils/hashPassword";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { sendEmail } from "../../utils/sendEmail";
 
 const credentialLogin = async (payload: Partial<IUser>) => {
@@ -70,8 +70,22 @@ const changePassword = async (
   });
 };
 
-const resetPassword = () => {
-  return;
+const resetPassword = async (
+  payload: Record<string, string>,
+  decodedToken: JwtPayload
+) => {
+  if (payload.id !== decodedToken.userId) {
+    throw new AppError(401, "User id doesn't match. Please try again");
+  }
+
+  const isUserExist = await User.findById(decodedToken.userId);
+
+  if (!isUserExist) {
+    throw new AppError(404, "User not found");
+  }
+
+  isUserExist.password =  await hashPassword(payload.password);
+  await isUserExist.save();
 };
 
 const setPassword = async (userId: string, password: string) => {
@@ -141,13 +155,17 @@ const forgotPassword = async (email: string) => {
   sendEmail({
     to: isUserExist.email,
     subject: "Password Reset",
-    templateName: "forgotPassword",
+    templateName: "forgetPassword",
     templateData: {
       name: isUserExist.name,
       resetUILink,
     },
   });
 };
+
+/**
+ * http://localhost:5173/reset-password?id=6882cf68e6d31d0266d7df80&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODgyY2Y2OGU2ZDMxZDAyNjZkN2RmODAiLCJlbWFpbCI6InRoZXBpb25lZXIxMjZAZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NTM0NDc4MzEsImV4cCI6MTc1MzQ0ODQzMX0.50dPoKxh8Sn7G5J4fF60OXgyskZf_b9ekPb5Zpbbqk8
+ */
 
 export const AuthServices = {
   credentialLogin,
