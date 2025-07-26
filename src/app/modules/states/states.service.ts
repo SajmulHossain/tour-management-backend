@@ -311,25 +311,42 @@ const payment = async () => {
 
   const avgPaymentAmountPromise = Payment.aggregate([
     {
-        $group: {
-            _id: null,
-            avgPaymentAmount: {$avg: "$amount"}
-        }
-    }
-  ])
+      $group: {
+        _id: null,
+        avgPaymentAmount: { $avg: "$amount" },
+      },
+    },
+  ]);
 
-  const [totalPayments, totalPaymentsByStatus, totalRevenue, avgPaymentAmount] =
-    await Promise.all([
-      totalPaymentsPromise,
-      totalPaymentsByStatusPromise,
-      totalRevenuePromise,
-      avgPaymentAmountPromise,
-    ]);
+  const paymentGatewayDataPromise = Payment.aggregate([
+    {
+      $group: {
+        _id: { $ifNull: ["$paymentGatewayData.status", "UNKNOWN"] },
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const [
+    totalPayments,
+    totalPaymentsByStatus,
+    totalRevenue,
+    avgPaymentAmount,
+    paymentGatewayData,
+  ] = await Promise.all([
+    totalPaymentsPromise,
+    totalPaymentsByStatusPromise,
+    totalRevenuePromise,
+    avgPaymentAmountPromise,
+    paymentGatewayDataPromise,
+  ]);
+
   return {
     totalPayments,
     totalPaymentsByStatus,
     totalRevenue: totalRevenue[0].totalRevenue,
     avgPaymentAmount: avgPaymentAmount[0].avgPaymentAmount,
+    paymentGatewayData,
   };
 };
 
