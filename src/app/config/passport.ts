@@ -56,7 +56,7 @@ passport.use(
         );
 
         if (!isPasswordMatched) {
-          return done(null, false, { message: "Password does not matched" });
+          return done("Password does not matched");
         }
 
         return done(null, isUserExist);
