@@ -11,10 +11,10 @@ const initPayment = catchAsync(async (req: Request, res: Response) => {
 
   sendResponse(res, {
     statusCode: 200,
-    success: true, 
-    message: 'Payment done successfully',
-    data: result
-  })
+    success: true,
+    message: "Payment done successfully",
+    data: result,
+  });
 });
 
 const successPayment = catchAsync(async (req: Request, res: Response) => {
@@ -56,9 +56,22 @@ const cancelPayment = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
+const getInvoiceUrl = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const data = await PaymentService.getInvoiceUrl(id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Payment done successfully",
+    data,
+  });
+});
+
 export const PaymentController = {
   successPayment,
   failPayment,
   cancelPayment,
   initPayment,
+  getInvoiceUrl,
 };
