@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { uploadBufferToCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { generatePdf, IInvoiceData } from "../../utils/invoice";
@@ -84,7 +83,8 @@ const successPayment = async (query: Record<string, string>) => {
         invoiceUrl: cloudinaryResult.secure_url,
       },
       {
-        runValidators: true, session
+        runValidators: true,
+        session,
       }
     );
 
@@ -169,16 +169,24 @@ const cancelPayment = async (query: Record<string, string>) => {
   }
 };
 
-const getInvoiceUrl = async(id: string) =>  {
+const getInvoiceUrl = async (id: string) => {
   const data = await Payment.findById(id).select("invoiceUrl -_id");
 
+  if(!data) {
+    throw new AppError(404, "Payment not found");
+  }
+
+  if(!data.invoiceUrl) {
+    throw new AppError(400, "Payment not completed");
+  }
+
   return data;
-}
+};
 
 export const PaymentService = {
   successPayment,
   failPayment,
   cancelPayment,
   initPayment,
-  getInvoiceUrl
+  getInvoiceUrl,
 };
