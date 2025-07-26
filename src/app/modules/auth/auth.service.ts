@@ -56,6 +56,11 @@ const changePassword = async (
   id: string
 ) => {
   const user = await User.findById(id);
+
+  if (oldPassword === newPassword) {
+    throw new AppError(400, "Please give a different password");
+  }
+
   const isOldPasswordMatch = await compare(
     oldPassword,
     user?.password as string
@@ -84,7 +89,7 @@ const resetPassword = async (
     throw new AppError(404, "User not found");
   }
 
-  isUserExist.password =  await hashPassword(payload.password);
+  isUserExist.password = await hashPassword(payload.password);
   await isUserExist.save();
 };
 

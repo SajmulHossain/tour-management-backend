@@ -65,6 +65,19 @@ const getAllUsers = catchAsync(
   }
 );
 
+const getSingleUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const user = await UserServices.getSingleUser(id);
+
+    res.status(httpStatus.OK).json({
+      success: true,
+      message: "User retrived successfully",
+      data: user,
+    });
+  }
+);
+
 const getMe = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.user as JwtPayload;
@@ -73,7 +86,7 @@ const getMe = catchAsync(
     res.status(httpStatus.OK).json({
       success: true,
       message: "User retrived successfully",
-      data: me
+      data: me,
     });
   }
 );
@@ -83,6 +96,7 @@ export const UserControllers = {
   getAllUsers,
   updateUser,
   getMe,
+  getSingleUser,
 };
 
 // * routing matching -> controllers -> service -> model -> DB
