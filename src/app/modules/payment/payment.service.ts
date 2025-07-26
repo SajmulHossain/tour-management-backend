@@ -1,7 +1,10 @@
 import AppError from "../../errorHelpers/AppError";
+import { generatePdf, IInvoiceData } from "../../utils/invoice";
+import { sendEmail } from "../../utils/sendEmail";
 import { BOOKING_STATUS } from "../booking/booking.interface";
 import { Booking } from "../booking/booking.model";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
+import { ITour } from "../tour/tour.interface";
 import { IUser } from "../user/user.interface";
 import { PAYMET_STATUS } from "./payment.interface";
 import { Payment } from "./payment.model";
@@ -38,11 +41,46 @@ const successPayment = async (query: Record<string, string>) => {
       { session, runValidators: true }
     );
 
-    await Booking.findByIdAndUpdate(
+    if (!updatedPayment) {
+      throw new AppError(404, "Payment info not found");
+    }
+
+    const updatedBooking = await Booking.findByIdAndUpdate(
       updatedPayment?.booking,
       { status: BOOKING_STATUS.COMPLETED },
-      { session, runValidators: true }
-    );
+      { session, runValidators: true, new: true }
+    )
+      .populate("tour", "title")
+      .populate("user", "name email");
+
+    if (!updatedBooking) {
+      throw new AppError(404, "Booking info not found");
+    }
+
+    const invoiceData: IInvoiceData = {
+      bookingDate: updatedBooking?.createdAt as Date,
+      guestsCount: updatedBooking?.guestCount,
+      amount: updatedPayment.amount,
+      tourTitle: (updatedBooking?.tour as unknown as ITour).title,
+      transactionId: updatedPayment.transactionId,
+      username: (updatedBooking.user as unknown as IUser).name,
+    };
+
+    const pdfBuffer = await generatePdf(invoiceData);
+
+    await sendEmail({
+      to: (updatedBooking.user as unknown as IUser).email,
+      subject: "Booking Confirmation Invoice",
+      templateName: "invoice",
+      templateData: invoiceData,
+      attachments: [
+        {
+          fileName: "invoice.pdf",
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    });
 
     await session.commitTransaction();
     session.endSession();
