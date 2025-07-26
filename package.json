@@ -5,6 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
+    "build": "tsc",
     "lint": "npx eslint ./src"
   },
   "keywords": [],
@@ -35,7 +36,7 @@
   "dependencies": {
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
-    "cloudinary": "^2.7.0",
+    "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
