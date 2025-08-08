@@ -24,7 +24,7 @@ app.use(express.json());
 app.set("trust proxy", 1);
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-  origin: envVars.FRONTEND_URL,
+  origin: envVars.FRONTEND_PROD_URL,
   credentials: true
 }));
 app.use(cookieParser());
