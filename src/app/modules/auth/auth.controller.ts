@@ -132,7 +132,7 @@ const forgotPassword = catchAsync(async (req: Request, res: Response) => {
 
 const googleCallBackController = catchAsync(
   async (req: Request, res: Response) => {
-    let redirectTo = req.query.state ? (req.query.state as string) : "";
+    let redirectTo = (req.query.state as string) || "";
 
     if (redirectTo.startsWith("/")) {
       redirectTo = redirectTo.slice(1);

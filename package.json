@@ -7,7 +7,7 @@
     "dev": "set NODE_ENV=development&& ts-node-dev --respawn --transpile-only ./src/server.ts",
     "build": "tsc",
     "lint": "npx eslint ./src",
-    "deploy": "set NODE_ENV=production&& npm run build && vercel --prod"
+    "deploy": "npm run build && vercel --prod"
   },
   "keywords": [],
   "author": "",
