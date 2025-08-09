@@ -43,7 +43,7 @@ router.get("/google", (req: Request, res: Response, next: NextFunction) => {
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: `${envVars.FRONTEND_PROD_URL}/login?error=There is some issues with your account. Contact with admin`}),
+  passport.authenticate("google", { failureRedirect: `${envVars.FRONTEND_URL}/login?error=There is some issues with your account. Contact with admin`}),
   AuthControllers.googleCallBackController
 );
 
