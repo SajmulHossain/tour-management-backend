@@ -57,7 +57,7 @@ import { Tour, TourType } from "./tour.model";
 // };
 
 const getAllTour = async (query: Record<string, string>) => {
-  const queryBuilder = new QueryBuilder(Tour.find(), query);
+  const queryBuilder = new QueryBuilder(Tour.find().populate("tourType").populate("division"), query);
   const tours = queryBuilder
     .filter()
     .search(tourSearchableFields)
