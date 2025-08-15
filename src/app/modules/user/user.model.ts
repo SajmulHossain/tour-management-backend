@@ -14,11 +14,12 @@ const userSchema = new Schema<IUser>(
     name: {
       type: String,
       required: true,
+      trim: true
     },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true, trim: true },
     password: { type: String },
     role: { type: String, enum: Object.values(Role), default: Role.USER },
-    phone: { type: String },
+    phone: { type: String, trim: true },
     picture: { type: String },
     isDeleted: { type: Boolean, default: false },
     isActive: {
