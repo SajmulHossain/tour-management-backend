@@ -2,14 +2,14 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
+import passport from "passport";
+import { envVars } from "../../config/env.config";
 import AppError from "../../errorHelpers/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { clearAuthCookies, setAuthCookie } from "../../utils/setCookies";
 import { createUserToken } from "../../utils/userToken";
 import { AuthServices } from "./auth.service";
-import passport from "passport";
-import { envVars } from "../../config/env.config";
 
 const credentialLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -91,17 +91,16 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
-const decodedToken = req.user as JwtPayload;
+  const decodedToken = req.user as JwtPayload;
 
-await AuthServices.resetPassword(req.body, decodedToken);
+  await AuthServices.resetPassword(req.body, decodedToken);
 
-sendResponse(res, {
-  success: true,
-  statusCode: 200,
-  message: "Passoword reset successfully",
-  data: null,
-});
-
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Passoword reset successfully",
+    data: null,
+  });
 });
 
 const setPassword = catchAsync(async (req: Request, res: Response) => {
@@ -121,19 +120,19 @@ const setPassword = catchAsync(async (req: Request, res: Response) => {
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   const { email } = req.body;
 
-  await AuthServices.forgotPassword(email)
+  await AuthServices.forgotPassword(email);
 
   sendResponse(res, {
-    success:true,
+    success: true,
     statusCode: 200,
-    message: 'Email sent successfully',
-    data: null
-  })
-})
+    message: "Email sent successfully",
+    data: null,
+  });
+});
 
 const googleCallBackController = catchAsync(
   async (req: Request, res: Response) => {
-    let redirectTo = req.query.state ? (req.query.state as string) : "";
+    let redirectTo = (req.query.state as string) || "";
 
     if (redirectTo.startsWith("/")) {
       redirectTo = redirectTo.slice(1);
@@ -159,5 +158,6 @@ export const AuthControllers = {
   logout,
   changePassword,
   googleCallBackController,
-  setPassword,forgotPassword
+  setPassword,
+  forgotPassword,
 };

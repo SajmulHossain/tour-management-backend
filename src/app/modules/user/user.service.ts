@@ -31,6 +31,8 @@ const createUser = async (payload: Partial<IUser>) => {
     ...rest,
   });
 
+  user.password = undefined;
+
   return user;
 };
 

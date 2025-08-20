@@ -7,6 +7,7 @@ const divisionSchema = new Schema<IDivision>(
       type: String,
       required: true,
       unique: true,
+      trim: true
     },
     slug: {
       type: String,

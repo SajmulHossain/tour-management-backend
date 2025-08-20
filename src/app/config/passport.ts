@@ -19,6 +19,10 @@ passport.use(
     },
     async (email: string, password: string, done: any) => {
       try {
+        if (!email || !password) {
+          return done("Missing Credentials");
+        }
+
         const isUserExist = await User.findOne({ email });
 
         if (!isUserExist) {
@@ -26,17 +30,20 @@ passport.use(
           return done("User does not exist");
         }
 
-         if (
-           isUserExist.isActive === IsActive.BLOCKED ||
-           isUserExist.isActive === IsActive.INACTIVE
-         ) {
+        if (
+          isUserExist.isActive === IsActive.BLOCKED ||
+          isUserExist.isActive === IsActive.INACTIVE
+        ) {
           return done(`User is ${isUserExist.isActive}`);
-         }
+        }
 
-         if (isUserExist.isDeleted) {
+        if (isUserExist.isDeleted) {
           return done("User is deleted");
-         }
+        }
 
+        if (!isUserExist.isVerified) {
+          return done("User is not verified");
+        }
 
         // * checking if the user is google authenticated, because it will skip the password
         const isGoogleAuthenticated = isUserExist.auths.some(
